@@ -78,35 +78,8 @@ ORDER BY ProcessedDate DESC;
 
 - Troubleshooting
 
+IssueSolutionSqlServer module missingRun the install commands aboveSSL connection errorAdd TrustServerCertificate=True to connection stringSMTP requires authenticationUncomment and add secure credential logic in scriptEmails not arrivingVerify SMTP relay allows the server IP
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-IssueSolutionSqlServer module missingRun the install commands aboveSSL connection errorAdd TrustServerCertificate=True to connection stringSMTP requires authenticationUncomment and add secure credential logic in scriptEmails not arrivingVerify SMTP relay allows the server IP; check logsInvalid header '<' errorScript already uses plain email (no display name) to avoid this
 - Limitations
 
 Advanced headers (Reply-To, sensitivity) not supported in PowerShell 5.1
