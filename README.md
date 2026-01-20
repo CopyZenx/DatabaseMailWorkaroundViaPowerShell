@@ -43,7 +43,7 @@ This repository provides a **transparent PowerShell workaround** that:
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/database-mail-workaround.git
+git clone https://github.com/CopyZenx/DatabaseMailWorkaroundViaPowerShell.git
 cd database-mail-workaround
 2. Install Required PowerShell Module (elevated PowerShell)
 PowerShell# Enable TLS 1.2 (important for older servers)
@@ -78,7 +78,9 @@ ORDER BY ProcessedDate DESC;
 
 - Troubleshooting
 
-IssueSolutionSqlServer module missingRun the install commands aboveSSL connection errorAdd TrustServerCertificate=True to connection stringSMTP requires authenticationUncomment and add secure credential logic in scriptEmails not arrivingVerify SMTP relay allows the server IP
+IssueSolutionSqlServer module missingRun the install commands aboveSSL connection errorAdd
+TrustServerCertificate=True to connection stringSMTP requires authenticationUncomment and add secure
+credential logic in scriptEmails not arrivingVerify SMTP relay allows the server IP
 
 - Limitations
 
