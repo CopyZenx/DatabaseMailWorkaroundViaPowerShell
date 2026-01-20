@@ -1,74 +1,83 @@
-Database Mail Workaround for SQL Server 2022
-This repository contains a PowerShell script that serves as a workaround for the Database Mail issue in SQL Server 2022 (CU22/CU23) where DatabaseMail.exe fails due to a missing internal assembly (Microsoft.SqlServer.DatabaseMail.XEvents).
-The script polls unsent mail items from msdb.dbo.sysmail_mailitems, sends them using Send-MailMessage, updates their status, and logs the process. It's designed to be transparent to SQL Agent jobs and sp_send_dbmail calls.
-Features
+Here’s a beautifully formatted README.md file optimized for GitHub's Markdown rendering (with headers, badges, tables, code blocks, emojis, and sections for great visual appeal). You can copy-paste this directly into your repository's README.md.
+Markdown<div align="center">
 
-Dynamic handling of multiple Database Mail profiles and accounts.
-Supports text/HTML bodies, attachments, priorities, CC/BCC.
-Duplicate prevention via a custom logging table (WorkaroundMailLog).
-Anonymous/relay SMTP mode (no credentials needed if configured that way).
-Compatible with PowerShell 5.1 (default on Windows Server 2016+).
+# 🛠️ Database Mail Workaround for SQL Server 2022
 
-Prerequisites
+**A seamless PowerShell-based replacement for the broken DatabaseMail.exe in SQL Server 2022 CU22/CU23**
 
-SQL Server 2022 (or compatible) with access to msdb database.
-PowerShell 5.1+ (built-in on Windows Server).
-Permissions: Run as an account with read/write access to msdb (e.g., SQL Server service account).
-SMTP server configured for anonymous/relay from the script's host.
+[![PowerShell](https://img.shields.io/badge/PowerShell-5.1+-blue?logo=powershell&logoColor=white)](https://learn.microsoft.com/powershell/)
+[![SQL Server](https://img.shields.io/badge/SQL%20Server-2022-orange?logo=microsoftsqlserver&logoColor=white)](https://www.microsoft.com/sql-server/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Installation and Setup
+</div>
 
-Clone the Repositorytextgit clone https://github.com/yourusername/database-mail-workaround.git
+## 🚨 The Problem
+
+After applying **SQL Server 2022 Cumulative Update 22 or 23**, Database Mail fails with:
+Could not load file or assembly 'Microsoft.SqlServer.DatabaseMail.XEvents, Version=16.0.0.0...'
+The system cannot find the file specified.
+textMicrosoft confirmed this is a **known packaging issue** — the referenced assembly is **not shipped** in the installation package, and it depends on update/installation paths.
+
+## ✨ The Solution
+
+This repository provides a **transparent PowerShell workaround** that:
+
+- Polls unsent mail items from `msdb.dbo.sysmail_mailitems`
+- Dynamically reads profiles, accounts, and SMTP settings
+- Sends emails using `Send-MailMessage` (anonymous/relay mode by default)
+- Updates `sent_status = 1` and logs to a custom table
+- Runs every few minutes via Task Scheduler
+
+**No changes needed in your SQL Agent jobs or application code!**
+
+## 📋 Features
+
+- Works with **multiple Database Mail profiles** and accounts
+- Supports **HTML/plain text**, attachments, CC/BCC, priorities
+- Prevents duplicate sends with custom logging table (`WorkaroundMailLog`)
+- Fully compatible with **PowerShell 5.1** (default on Windows Server)
+- Easy to schedule and monitor
+
+## 🚀 Quick Start
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/yourusername/database-mail-workaround.git
 cd database-mail-workaround
-Install Required Modules (Run in elevated PowerShell)
-Step 1: Enable TLS 1.2 (for older servers to access PowerShell Gallery):text[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-Step 2: Install NuGet Provider (required for module installation):textInstall-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force
-Step 3: Install SqlServer Module (for Invoke-Sqlcmd):textInstall-Module -Name SqlServer -Force -AllowClobber -Scope AllUsers
-If prompted, trust the PSGallery repository (type 'Y').
-Verify: Get-Module -ListAvailable SqlServer.
+2. Install Required PowerShell Module (elevated PowerShell)
+PowerShell# Enable TLS 1.2 (important for older servers)
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
+# Install NuGet provider
+Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force
 
-Configure the Script
+# Install SqlServer module (system-wide)
+Install-Module -Name SqlServer -Force -AllowClobber -Scope AllUsers
+Accept the PSGallery prompt if asked (type 'Y').
+3. Configure & Run the Script
+
 Edit DatabaseMailWorkaround.ps1:
-Set $SqlServerInstance to your SQL instance (e.g., ".", "SERVER\INSTANCE", or FQDN).
-Adjust $LogFilePath for logging (e.g., "C:\Logs\DatabaseMailWorkaround.log").
-If your SMTP requires credentials: Uncomment and add secure password logic in the credentials section.
+Set $SqlServerInstance (e.g. ".", "SQLSERVER01", or FQDN)
+Adjust $LogFilePath (e.g. "C:\Logs\DatabaseMailWorkaround.log")
 
-If SSL errors occur with Invoke-Sqlcmd, use:textInvoke-Sqlcmd -ConnectionString "Server=$SqlServerInstance;Database=msdb;Integrated Security=True;TrustServerCertificate=True;" -Query $query
+Test manually:PowerShell.\DatabaseMailWorkaround.ps1
 
+4. Schedule It (Recommended for Production)
+Use Task Scheduler:
 
-Usage
+Trigger: Every 2–5 minutes
+Action: powershell.exe -ExecutionPolicy Bypass -File "C:\Path\To\DatabaseMailWorkaround.ps1"
+Run with highest privileges and the SQL service account
 
-Run Manually (for testing):text.\DatabaseMailWorkaround.ps1
-Schedule via Task Scheduler (for production):
-Open Task Scheduler → Create Task.
-General: Run with highest privileges; Run whether user logged on or not.
-Trigger: Every 2-5 minutes (repeat indefinitely).
-Action: Start a program → powershell.exe
-Arguments: -ExecutionPolicy Bypass -File "C:\Path\To\DatabaseMailWorkaround.ps1"
-Use the SQL service account or equivalent.
+-Monitoring & Logs
 
-Monitoring
-Check logs: Open $LogFilePath.
-Query custom table:SQLSELECT * FROM msdb.dbo.WorkaroundMailLog ORDER BY ProcessedDate DESC;
-Verify sent mails:SQLSELECT * FROM msdb.dbo.sysmail_mailitems WHERE sent_status = 1;
+Log file: Check $LogFilePath for detailed activity
+Custom table:SQLSELECT * FROM msdb.dbo.WorkaroundMailLog
+ORDER BY ProcessedDate DESC;
 
-
-Troubleshooting
-
-Module Not Found: Reinstall SqlServer module (see Installation).
-SSL/Connection Errors: Use TrustServerCertificate=True in connection string.
-SMTP Auth Required: Add credentials in the script (use app passwords for security).
-No Mails Sent: Ensure unsent items exist (SELECT * FROM msdb.dbo.sysmail_mailitems WHERE sent_status IN (0,2);).
-Display Name Issues: Script uses plain email for From; upgrade to PowerShell 7 for better header support if needed.
-
-Limitations
-
-Skips advanced features like custom Reply-To or sensitivity headers (due to PowerShell 5.1 limits).
-Assumes anonymous SMTP; customize for authenticated servers.
-Not a permanent fix — monitor for Microsoft CU/hotfix.
-
-Contributing
-Feel free to fork, submit PRs, or report issues. Tested on Windows Server 2016+ with SQL 2022.
-License
-MIT License — free to use/modify.
+❤️ Contributing
+Pull requests, issues, and stars are welcome!
+Tested on Windows Server 2016+ with SQL Server 2022.
+📄 License
+MIT License – feel free to use and modify.
