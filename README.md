@@ -1,7 +1,7 @@
 Here’s a beautifully formatted README.md file optimized for GitHub's Markdown rendering (with headers, badges, tables, code blocks, emojis, and sections for great visual appeal). You can copy-paste this directly into your repository's README.md.
 Markdown<div align="center">
 
-# 🛠️ Database Mail Workaround for SQL Server 2022
+# - Database Mail Workaround for SQL Server 2022
 
 **A seamless PowerShell-based replacement for the broken DatabaseMail.exe in SQL Server 2022 CU22/CU23**
 
@@ -11,14 +11,14 @@ Markdown<div align="center">
 
 </div>
 
-## 🚨 The Problem
+## - The Problem
 
 After applying **SQL Server 2022 Cumulative Update 22 or 23**, Database Mail fails with:
 Could not load file or assembly 'Microsoft.SqlServer.DatabaseMail.XEvents, Version=16.0.0.0...'
 The system cannot find the file specified.
 textMicrosoft confirmed this is a **known packaging issue** — the referenced assembly is **not shipped** in the installation package, and it depends on update/installation paths.
 
-## ✨ The Solution
+## - The Solution
 
 This repository provides a **transparent PowerShell workaround** that:
 
@@ -30,7 +30,7 @@ This repository provides a **transparent PowerShell workaround** that:
 
 **No changes needed in your SQL Agent jobs or application code!**
 
-## 📋 Features
+## - Features
 
 - Works with **multiple Database Mail profiles** and accounts
 - Supports **HTML/plain text**, attachments, CC/BCC, priorities
@@ -38,7 +38,7 @@ This repository provides a **transparent PowerShell workaround** that:
 - Fully compatible with **PowerShell 5.1** (default on Windows Server)
 - Easy to schedule and monitor
 
-## 🚀 Quick Start
+## - Quick Start
 
 ### 1. Clone the Repository
 
@@ -70,14 +70,51 @@ Trigger: Every 2–5 minutes
 Action: powershell.exe -ExecutionPolicy Bypass -File "C:\Path\To\DatabaseMailWorkaround.ps1"
 Run with highest privileges and the SQL service account
 
--Monitoring & Logs
+- Monitoring & Logs
 
 Log file: Check $LogFilePath for detailed activity
 Custom table:SQLSELECT * FROM msdb.dbo.WorkaroundMailLog
 ORDER BY ProcessedDate DESC;
 
-❤️ Contributing
+- Troubleshooting
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+IssueSolutionSqlServer module missingRun the install commands aboveSSL connection errorAdd TrustServerCertificate=True to connection stringSMTP requires authenticationUncomment and add secure credential logic in scriptEmails not arrivingVerify SMTP relay allows the server IP; check logsInvalid header '<' errorScript already uses plain email (no display name) to avoid this
+- Limitations
+
+Advanced headers (Reply-To, sensitivity) not supported in PowerShell 5.1
+Designed for anonymous/relay SMTP (add credentials if needed)
+Temporary workaround — watch for official Microsoft fix in future CUs
+
+- Contributing
 Pull requests, issues, and stars are welcome!
 Tested on Windows Server 2016+ with SQL Server 2022.
-📄 License
+- License
 MIT License – feel free to use and modify.
